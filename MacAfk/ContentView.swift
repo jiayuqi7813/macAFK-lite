@@ -254,7 +254,7 @@ struct ContentView: View {
                 .multilineTextAlignment(.center)
         }
         .padding(40)
-        .frame(minWidth: 400, minHeight: 400)
+        .frame(minWidth: 400, minHeight: 700)
         .sheet(isPresented: $showingShortcutEditor) {
             ShortcutEditorView(shortcutManager: appModel.shortcutManager)
         }
