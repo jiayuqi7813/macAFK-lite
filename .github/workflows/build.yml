@@ -17,7 +17,7 @@ jobs:
     
     strategy:
       matrix:
-        variant: [Pro, Lite]
+        variant: [Pro]
         arch: [arm64, x86_64]
     
     steps:
@@ -63,11 +63,12 @@ jobs:
         # 确定配置
         if [ "${{ matrix.variant }}" = "Pro" ]; then
           CONFIG="Release"
-          EXPORT_PLIST="ExportOptions-Pro.plist"
         else
           CONFIG="Release-AppStore"
-          EXPORT_PLIST="ExportOptions-Lite.plist"
         fi
+        
+        # CI 环境使用统一的导出配置（不需要签名）
+        EXPORT_PLIST="ExportOptions-CI.plist"
         
         # 构建
         xcodebuild -scheme MacAfk \
@@ -83,7 +84,8 @@ jobs:
         xcodebuild -exportArchive \
           -archivePath "$ARCHIVE_DIR/MacAfk-${{ matrix.variant }}-${{ matrix.arch }}.xcarchive" \
           -exportPath "$BUILD_DIR/${{ matrix.variant }}-${{ matrix.arch }}" \
-          -exportOptionsPlist "$PROJECT_DIR/$EXPORT_PLIST"
+          -exportOptionsPlist "$PROJECT_DIR/$EXPORT_PLIST" \
+          -allowProvisioningUpdates
         
         echo "✅ 构建成功：MacAfk ${{ matrix.variant }} (${{ matrix.arch }})"
     

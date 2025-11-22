@@ -322,9 +322,6 @@ show_release_info() {
     echo "   ✓ MacAfk-Pro-Universal-v$version.dmg"
     echo "   ✓ MacAfk-Pro-arm64-v$version.dmg"
     echo "   ✓ MacAfk-Pro-x86_64-v$version.dmg"
-    echo "   ✓ MacAfk-Lite-Universal-v$version.dmg"
-    echo "   ✓ MacAfk-Lite-arm64-v$version.dmg"
-    echo "   ✓ MacAfk-Lite-x86_64-v$version.dmg"
     echo "   ✓ checksums.txt"
     echo ""
     

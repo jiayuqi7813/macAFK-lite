@@ -52,16 +52,27 @@ build_variant() {
         CODE_SIGNING_ALLOWED=NO
     
     # 导出 app
-    if [ "$variant" = "Pro" ]; then
+    # 检查是否在 CI 环境中
+    if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+        # CI 环境使用 CI 配置（不需要签名）
         xcodebuild -exportArchive \
             -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
             -exportPath "$export_path" \
-            -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Pro.plist"
+            -exportOptionsPlist "$PROJECT_DIR/ExportOptions-CI.plist" \
+            -allowProvisioningUpdates
     else
-        xcodebuild -exportArchive \
-            -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
-            -exportPath "$export_path" \
-            -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Lite.plist"
+        # 本地环境使用正式配置
+        if [ "$variant" = "Pro" ]; then
+            xcodebuild -exportArchive \
+                -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
+                -exportPath "$export_path" \
+                -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Pro.plist"
+        else
+            xcodebuild -exportArchive \
+                -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
+                -exportPath "$export_path" \
+                -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Lite.plist"
+        fi
     fi
     
     echo "✅ MacAfk $variant ($arch) 构建完成！"
@@ -102,20 +113,20 @@ build_variant "Pro" "x86_64" "Release"
 create_dmg "Pro" "arm64" "MacAfk Pro"
 create_dmg "Pro" "x86_64" "MacAfk Pro"
 
-# 构建 Lite 版本
-echo ""
-echo "═══════════════════════════════"
-echo "📦 构建 Lite 版本（App Store）"
-echo "═══════════════════════════════"
-echo "   - 沙盒：启用"
-echo "   - 亮度控制：Gamma 调光"
-echo "   - Bundle ID: com.snowywar.MacAfk.lite"
-
-build_variant "Lite" "arm64" "Release-AppStore"
-build_variant "Lite" "x86_64" "Release-AppStore"
-
-create_dmg "Lite" "arm64" "MacAfk Lite"
-create_dmg "Lite" "x86_64" "MacAfk Lite"
+# Lite 版本已禁用（如需启用，取消下面注释）
+# echo ""
+# echo "═══════════════════════════════"
+# echo "📦 构建 Lite 版本（App Store）"
+# echo "═══════════════════════════════"
+# echo "   - 沙盒：启用"
+# echo "   - 亮度控制：Gamma 调光"
+# echo "   - Bundle ID: com.snowywar.MacAfk.lite"
+# 
+# build_variant "Lite" "arm64" "Release-AppStore"
+# build_variant "Lite" "x86_64" "Release-AppStore"
+# 
+# create_dmg "Lite" "arm64" "MacAfk Lite"
+# create_dmg "Lite" "x86_64" "MacAfk Lite"
 
 # 创建通用二进制（Universal Binary）
 echo ""
@@ -156,7 +167,7 @@ create_universal() {
 }
 
 create_universal "Pro" "MacAfk Pro"
-create_universal "Lite" "MacAfk Lite"
+# create_universal "Lite" "MacAfk Lite"  # Lite 版本已禁用
 
 # 生成校验和
 echo ""
