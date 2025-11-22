@@ -1,0 +1,77 @@
+/* 
+  Localizable.strings (简体中文)
+  MacAfk
+*/
+
+// App Name
+"app.name" = "MacAfk";
+
+// Status Messages
+"status.preventing_sleep" = "正在防止休眠...";
+"status.system_sleep_allowed" = "通过鼠标抖动防止阻止系统休眠";
+
+// Buttons
+"button.start_jiggling" = "开始抖动";
+"button.stop_jiggling" = "停止抖动";
+"button.cancel" = "取消";
+"button.done" = "完成";
+"button.reset_defaults" = "恢复默认";
+"button.quit" = "退出";
+"button.quit_macafk" = "退出 MacAfk";
+"button.customize_all_shortcuts" = "自定义所有快捷键";
+
+// Settings
+"settings.title" = "快捷键设置";
+"settings.low_brightness_mode" = "低亮度模式";
+"settings.low_brightness_mode.help" = "抖动时自动降低亮度";
+"settings.shortcuts" = "快捷键";
+"settings.macafk_settings" = "MacAfk 设置";
+"settings.enable_low_brightness_mode" = "启用低亮度模式";
+"settings.toggle_jiggler_shortcut" = "切换抖动: Cmd + Ctrl + S";
+
+// Jiggle Interval
+"jiggle.interval" = "抖动间隔:";
+"jiggle.interval.decrease" = "减少间隔 (⌘ ⌃ ↓)";
+"jiggle.interval.increase" = "增加间隔 (⌘ ⌃ ↑)";
+
+// Shortcut Actions
+"shortcut.toggle_jiggle" = "切换防休眠";
+"shortcut.toggle_brightness" = "切换低亮度模式";
+"shortcut.increase_interval" = "增加抖动间隔";
+"shortcut.decrease_interval" = "减少抖动间隔";
+
+// Shortcut Descriptions
+"shortcut.toggle_jiggle.description" = "开启或关闭鼠标抖动防休眠";
+"shortcut.toggle_brightness.description" = "开启或关闭低亮度模式";
+"shortcut.increase_interval.description" = "增加鼠标抖动的时间间隔";
+"shortcut.decrease_interval.description" = "减少鼠标抖动的时间间隔";
+
+// Shortcut Editor
+"shortcut.editor.title" = "快捷键设置";
+"shortcut.editor.recording" = "按下新快捷键...";
+"shortcut.editor.not_set" = "未设置";
+
+// Menu Items
+"menu.start_jiggling" = "开始抖动";
+"menu.stop_jiggling" = "停止抖动";
+"menu.show_main_window" = "显示主窗口";
+
+// Footer
+"footer.permission_hint" = "提示：需要在「系统设置 > 隐私与安全性 > 辅助功能」中授予权限";
+
+// Messages
+"message.low_brightness_enabled" = "低亮度模式已启用";
+"message.low_brightness_disabled" = "低亮度模式已关闭";
+
+// Settings Menu
+"menu.settings" = "设置";
+"menu.preferences" = "偏好设置...";
+"menu.language" = "语言";
+"menu.language.english" = "English";
+"menu.language.chinese" = "简体中文";
+"menu.language.restart_required" = "语言更改将在重启后生效";
+
+// Language
+"language.english" = "English";
+"language.chinese" = "简体中文";
+

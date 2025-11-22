@@ -1,0 +1,123 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  XCODE_VERSION: '15.0'
+
+jobs:
+  build:
+    name: Build MacAfk
+    runs-on: macos-latest
+    
+    strategy:
+      matrix:
+        variant: [Pro, Lite]
+        arch: [arm64, x86_64]
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 设置 Xcode 版本
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: 显示 Xcode 信息
+      run: |
+        xcodebuild -version
+        xcode-select -p
+    
+    - name: 设置构建环境
+      run: |
+        echo "VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo '1.0.0-dev')" >> $GITHUB_ENV
+    
+    - name: 缓存构建产物
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/Library/Caches/org.swift.swiftpm
+          ~/Library/Developer/Xcode/DerivedData
+        key: ${{ runner.os }}-xcode-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-xcode-
+    
+    - name: 构建 ${{ matrix.variant }} (${{ matrix.arch }})
+      run: |
+        set -e
+        
+        PROJECT_DIR="$(pwd)"
+        ARCHIVE_DIR="$PROJECT_DIR/Archives"
+        BUILD_DIR="$PROJECT_DIR/Build"
+        
+        mkdir -p "$ARCHIVE_DIR"
+        mkdir -p "$BUILD_DIR"
+        
+        # 确定配置
+        if [ "${{ matrix.variant }}" = "Pro" ]; then
+          CONFIG="Release"
+          EXPORT_PLIST="ExportOptions-Pro.plist"
+        else
+          CONFIG="Release-AppStore"
+          EXPORT_PLIST="ExportOptions-Lite.plist"
+        fi
+        
+        # 构建
+        xcodebuild -scheme MacAfk \
+          -configuration "$CONFIG" \
+          -arch ${{ matrix.arch }} \
+          -archivePath "$ARCHIVE_DIR/MacAfk-${{ matrix.variant }}-${{ matrix.arch }}.xcarchive" \
+          archive \
+          CODE_SIGN_IDENTITY="-" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+        
+        # 导出
+        xcodebuild -exportArchive \
+          -archivePath "$ARCHIVE_DIR/MacAfk-${{ matrix.variant }}-${{ matrix.arch }}.xcarchive" \
+          -exportPath "$BUILD_DIR/${{ matrix.variant }}-${{ matrix.arch }}" \
+          -exportOptionsPlist "$PROJECT_DIR/$EXPORT_PLIST"
+        
+        echo "✅ 构建成功：MacAfk ${{ matrix.variant }} (${{ matrix.arch }})"
+    
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v3
+      with:
+        name: MacAfk-${{ matrix.variant }}-${{ matrix.arch }}
+        path: Build/${{ matrix.variant }}-${{ matrix.arch }}/*.app
+        retention-days: 7
+  
+  test:
+    name: 运行测试
+    runs-on: macos-latest
+    needs: build
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+    
+    - name: 设置 Xcode 版本
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: 运行单元测试
+      run: |
+        xcodebuild test \
+          -scheme MacAfk \
+          -destination 'platform=macOS' \
+          -enableCodeCoverage YES
+    
+    - name: 生成测试报告
+      if: always()
+      run: |
+        echo "测试完成"
+

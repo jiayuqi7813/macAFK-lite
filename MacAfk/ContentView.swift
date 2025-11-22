@@ -46,7 +46,7 @@ struct ContentView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 
-                Text(appModel.isJiggling ? "Preventing Sleep..." : "System Sleep Allowed")
+                Text(appModel.isJiggling ? "status.preventing_sleep".localized : "status.system_sleep_allowed".localized)
                     .font(.headline)
                     .foregroundColor(.secondary)
             }
@@ -56,7 +56,7 @@ struct ContentView: View {
                 Button(action: {
                     appModel.toggleJiggle()
                 }) {
-                    Text(appModel.isJiggling ? "Stop Jiggling" : "Start Jiggling")
+                    Text(appModel.isJiggling ? "button.stop_jiggling".localized : "button.start_jiggling".localized)
                         .font(.title2)
                         .fontWeight(.semibold)
                         .frame(width: 200, height: 40)
@@ -71,7 +71,7 @@ struct ContentView: View {
                         .foregroundColor(.blue)
                         .font(.system(size: 16))
                     
-                    Text("抖动间隔:")
+                    Text("jiggle.interval".localized)
                         .font(.body)
                         .foregroundColor(.secondary)
                     
@@ -92,7 +92,7 @@ struct ContentView: View {
                                 .font(.system(size: 20))
                         }
                         .buttonStyle(.plain)
-                        .help("减少间隔 (⌘ ⌃ ↓)")
+                        .help("jiggle.interval.decrease".localized)
                         
                         Button(action: {
                             appModel.jiggler.increaseInterval()
@@ -101,15 +101,15 @@ struct ContentView: View {
                                 .font(.system(size: 20))
                         }
                         .buttonStyle(.plain)
-                        .help("增加间隔 (⌘ ⌃ ↑)")
+                        .help("jiggle.interval.increase".localized)
                     }
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
                 
-                Toggle("Low Brightness Mode", isOn: $appModel.isLowBrightness)
+                Toggle("settings.low_brightness_mode".localized, isOn: $appModel.isLowBrightness)
                     .toggleStyle(.switch)
-                    .help("Automatically lower brightness when Jiggler is active")
+                    .help("settings.low_brightness_mode.help".localized)
             }
             .padding()
             .background(RoundedRectangle(cornerRadius: 12).fill(Color(nsColor: .controlBackgroundColor)))
@@ -203,7 +203,7 @@ struct ContentView: View {
                 HStack {
                     Image(systemName: "keyboard")
                         .foregroundColor(.blue)
-                    Text("快捷键设置")
+                    Text("settings.title".localized)
                         .font(.headline)
                         .fontWeight(.bold)
                     Spacer()
@@ -212,14 +212,14 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     ShortcutRow(
                         icon: "power",
-                        title: "切换防休眠",
+                        title: "shortcut.toggle_jiggle".localized,
                         shortcut: appModel.shortcutManager.getShortcutDisplay(for: .toggleJiggle),
                         color: .green
                     )
                     
                     ShortcutRow(
                         icon: "sun.max",
-                        title: "切换低亮度模式",
+                        title: "shortcut.toggle_brightness".localized,
                         shortcut: appModel.shortcutManager.getShortcutDisplay(for: .toggleBrightness),
                         color: .orange
                     )
@@ -230,7 +230,7 @@ struct ContentView: View {
                 }) {
                     HStack {
                         Image(systemName: "slider.horizontal.3")
-                        Text("自定义所有快捷键")
+                        Text("button.customize_all_shortcuts".localized)
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -248,7 +248,7 @@ struct ContentView: View {
             )
             
             // Footer
-            Text("提示：需要在「系统设置 > 隐私与安全性 > 辅助功能」中授予权限")
+            Text("footer.permission_hint".localized)
                 .font(.caption2)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

@@ -4,13 +4,33 @@ import Combine
 
 class Jiggler: ObservableObject {
     @Published var isRunning = false
-    @Published var currentInterval: TimeInterval = 60 // 默认 60 秒
+    @Published var currentInterval: TimeInterval = 60 {
+        didSet {
+            if !isLoading {
+                saveInterval()
+            }
+        }
+    }
     
     private var timer: Timer?
     
     // 可选的间隔档位（秒）
     private let intervalPresets: [TimeInterval] = [10, 30, 60, 120, 300, 600]
-    private var currentPresetIndex: Int = 2 // 默认 60 秒
+    private var currentPresetIndex: Int = 2 {
+        didSet {
+            if !isLoading {
+                saveInterval()
+            }
+        }
+    }
+    
+    private let intervalKey = "jiggler.interval"
+    private let presetIndexKey = "jiggler.presetIndex"
+    private var isLoading = false
+    
+    init() {
+        loadInterval()
+    }
     
     func start() {
         // 确保在主线程上执行
@@ -129,10 +149,47 @@ class Jiggler: ObservableObject {
     /// 获取间隔显示字符串
     func getIntervalDisplay() -> String {
         if currentInterval < 60 {
-            return "\(Int(currentInterval)) 秒"
+            return "\(Int(currentInterval)) s"
         } else {
             let minutes = Int(currentInterval / 60)
-            return "\(minutes) 分钟"
+            return "\(minutes) min"
+        }
+    }
+    
+    // MARK: - 持久化
+    
+    /// 保存间隔设置到 UserDefaults
+    private func saveInterval() {
+        UserDefaults.standard.set(currentInterval, forKey: intervalKey)
+        UserDefaults.standard.set(currentPresetIndex, forKey: presetIndexKey)
+    }
+    
+    /// 从 UserDefaults 加载间隔设置
+    private func loadInterval() {
+        isLoading = true
+        defer { isLoading = false }
+        
+        // 尝试加载保存的间隔
+        if let savedInterval = UserDefaults.standard.object(forKey: intervalKey) as? TimeInterval,
+           savedInterval > 0 {
+            currentInterval = savedInterval
+            
+            // 尝试加载保存的档位索引
+            let savedIndex = UserDefaults.standard.integer(forKey: presetIndexKey)
+            if savedIndex >= 0 && savedIndex < intervalPresets.count {
+                currentPresetIndex = savedIndex
+            } else {
+                // 如果索引无效，找最接近的档位
+                if let closestIndex = intervalPresets.enumerated().min(by: { abs($0.element - savedInterval) < abs($1.element - savedInterval) })?.offset {
+                    currentPresetIndex = closestIndex
+                }
+            }
+            print("📖 [Jiggler] 已加载保存的间隔: \(Int(currentInterval)) 秒 (档位: \(currentPresetIndex))")
+        } else {
+            // 如果没有保存的设置，使用默认值
+            currentInterval = 60
+            currentPresetIndex = 2
+            print("ℹ️ [Jiggler] 使用默认间隔: 60 秒")
         }
     }
     

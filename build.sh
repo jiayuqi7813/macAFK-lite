@@ -1,78 +1,169 @@
 #!/bin/bash
 
-# MacAfk 双版本构建脚本
-# 用于构建 Pro 版和 Lite 版（App Store）
+# MacAfk 多架构构建脚本
+# 用于构建 Pro 版和 Lite 版的 ARM64 和 x86_64 版本
 
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$PROJECT_DIR/MacAfk"
+PROJECT_NAME="MacAfk"
 
 BUILD_DIR="$PROJECT_DIR/Build"
 ARCHIVE_DIR="$PROJECT_DIR/Archives"
+DIST_DIR="$PROJECT_DIR/Dist"
 
-echo "🏗️  MacAfk 双版本构建脚本"
+# 获取版本号（从 git tag 或默认值）
+VERSION="${VERSION:-$(git describe --tags --abbrev=0 2>/dev/null || echo "1.0.0")}"
+
+echo "🏗️  MacAfk 多架构构建脚本"
 echo "================================"
+echo "版本: $VERSION"
+echo ""
 
 # 清理旧的构建产物
-echo ""
 echo "🧹 清理旧的构建产物..."
 rm -rf "$BUILD_DIR"
 rm -rf "$ARCHIVE_DIR"
+rm -rf "$DIST_DIR"
 mkdir -p "$BUILD_DIR"
 mkdir -p "$ARCHIVE_DIR"
+mkdir -p "$DIST_DIR"
 
-# 构建 Pro 版（真实硬件亮度）
+# 构建函数
+build_variant() {
+    local variant=$1  # Pro 或 Lite
+    local arch=$2     # arm64 或 x86_64
+    local config=$3   # Release 或 Release-AppStore
+    
+    echo ""
+    echo "🚀 构建 MacAfk $variant ($arch)..."
+    
+    local archive_name="MacAfk-${variant}-${arch}"
+    local export_path="$BUILD_DIR/${variant}-${arch}"
+    
+    # 构建 archive
+    xcodebuild -scheme "$PROJECT_NAME" \
+        -configuration "$config" \
+        -arch "$arch" \
+        -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
+        archive \
+        CODE_SIGN_IDENTITY="-" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO
+    
+    # 导出 app
+    if [ "$variant" = "Pro" ]; then
+        xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
+            -exportPath "$export_path" \
+            -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Pro.plist"
+    else
+        xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
+            -exportPath "$export_path" \
+            -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Lite.plist"
+    fi
+    
+    echo "✅ MacAfk $variant ($arch) 构建完成！"
+}
+
+# 创建 DMG 函数
+create_dmg() {
+    local variant=$1
+    local arch=$2
+    local app_name=$3
+    
+    echo ""
+    echo "📦 创建 MacAfk $variant ($arch) DMG..."
+    
+    local source_dir="$BUILD_DIR/${variant}-${arch}"
+    local dmg_name="MacAfk-${variant}-${arch}-v${VERSION}.dmg"
+    
+    hdiutil create -volname "MacAfk $variant" \
+        -srcfolder "$source_dir" \
+        -ov -format UDZO \
+        "$DIST_DIR/$dmg_name"
+    
+    echo "✅ DMG 创建完成：$dmg_name"
+}
+
+# 构建 Pro 版本
 echo ""
-echo "🚀 构建 MacAfk Pro（真实硬件亮度）..."
+echo "═══════════════════════════════"
+echo "📦 构建 Pro 版本（真实硬件亮度）"
+echo "═══════════════════════════════"
 echo "   - 沙盒：禁用"
 echo "   - 亮度控制：DisplayServices API"
 echo "   - Bundle ID: com.snowywar.MacAfk"
+
+build_variant "Pro" "arm64" "Release"
+build_variant "Pro" "x86_64" "Release"
+
+create_dmg "Pro" "arm64" "MacAfk Pro"
+create_dmg "Pro" "x86_64" "MacAfk Pro"
+
+# 构建 Lite 版本
 echo ""
-
-xcodebuild -scheme MacAfk \
-    -configuration Release \
-    -archivePath "$ARCHIVE_DIR/MacAfk-Pro.xcarchive" \
-    archive
-
-xcodebuild -exportArchive \
-    -archivePath "$ARCHIVE_DIR/MacAfk-Pro.xcarchive" \
-    -exportPath "$BUILD_DIR/MacAfk-Pro" \
-    -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Pro.plist"
-
-echo "✅ MacAfk Pro 构建完成！"
-
-# 构建 Lite 版（Gamma 调光，App Store 兼容）
-echo ""
-echo "🚀 构建 MacAfk Lite（App Store 版本）..."
+echo "═══════════════════════════════"
+echo "📦 构建 Lite 版本（App Store）"
+echo "═══════════════════════════════"
 echo "   - 沙盒：启用"
 echo "   - 亮度控制：Gamma 调光"
 echo "   - Bundle ID: com.snowywar.MacAfk.lite"
+
+build_variant "Lite" "arm64" "Release-AppStore"
+build_variant "Lite" "x86_64" "Release-AppStore"
+
+create_dmg "Lite" "arm64" "MacAfk Lite"
+create_dmg "Lite" "x86_64" "MacAfk Lite"
+
+# 创建通用二进制（Universal Binary）
 echo ""
+echo "═══════════════════════════════"
+echo "🔗 创建通用二进制版本"
+echo "═══════════════════════════════"
 
-xcodebuild -scheme MacAfk \
-    -configuration Release-AppStore \
-    -archivePath "$ARCHIVE_DIR/MacAfk-Lite.xcarchive" \
-    archive
+create_universal() {
+    local variant=$1
+    local app_name=$2
+    
+    echo ""
+    echo "📦 合并 $variant 版本 (arm64 + x86_64)..."
+    
+    local arm_app="$BUILD_DIR/${variant}-arm64/${app_name}.app"
+    local x86_app="$BUILD_DIR/${variant}-x86_64/${app_name}.app"
+    local universal_dir="$BUILD_DIR/${variant}-Universal"
+    local universal_app="$universal_dir/${app_name}.app"
+    
+    mkdir -p "$universal_dir"
+    cp -R "$arm_app" "$universal_app"
+    
+    # 合并二进制文件
+    lipo -create \
+        "$arm_app/Contents/MacOS/$PROJECT_NAME" \
+        "$x86_app/Contents/MacOS/$PROJECT_NAME" \
+        -output "$universal_app/Contents/MacOS/$PROJECT_NAME"
+    
+    # 创建 Universal DMG
+    local dmg_name="MacAfk-${variant}-Universal-v${VERSION}.dmg"
+    
+    hdiutil create -volname "MacAfk $variant" \
+        -srcfolder "$universal_dir" \
+        -ov -format UDZO \
+        "$DIST_DIR/$dmg_name"
+    
+    echo "✅ Universal DMG 创建完成：$dmg_name"
+}
 
-xcodebuild -exportArchive \
-    -archivePath "$ARCHIVE_DIR/MacAfk-Lite.xcarchive" \
-    -exportPath "$BUILD_DIR/MacAfk-Lite" \
-    -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Lite.plist"
+create_universal "Pro" "MacAfk Pro"
+create_universal "Lite" "MacAfk Lite"
 
-echo "✅ MacAfk Lite 构建完成！"
-
-# 创建 DMG（仅 Pro 版）
+# 生成校验和
 echo ""
-echo "📦 创建 MacAfk Pro DMG..."
-
-# 简单创建 DMG
-hdiutil create -volname "MacAfk Pro" \
-    -srcfolder "$BUILD_DIR/MacAfk-Pro" \
-    -ov -format UDZO \
-    "$BUILD_DIR/MacAfk-Pro-v1.0.dmg"
-
-echo "✅ DMG 创建完成！"
+echo "🔐 生成校验和..."
+cd "$DIST_DIR"
+shasum -a 256 *.dmg > checksums.txt
+echo "✅ 校验和已保存到 checksums.txt"
 
 # 显示结果
 echo ""
@@ -80,12 +171,17 @@ echo "================================"
 echo "🎉 构建完成！"
 echo ""
 echo "📁 构建产物位置："
-echo "   Pro 版:  $BUILD_DIR/MacAfk-Pro/MacAfk Pro.app"
-echo "   Pro DMG: $BUILD_DIR/MacAfk-Pro-v1.0.dmg"
-echo "   Lite 版: $BUILD_DIR/MacAfk-Lite/MacAfk Lite.app"
+echo "   $DIST_DIR/"
+echo ""
+echo "📦 生成的文件："
+ls -lh "$DIST_DIR"
+echo ""
+echo "📋 版本信息："
+echo "   版本号: $VERSION"
+echo "   构建时间: $(date)"
 echo ""
 echo "📋 下一步："
-echo "   1. Pro 版: 签名后发布到 GitHub/网站"
+echo "   1. Pro 版: 发布到 GitHub Release"
 echo "   2. Lite 版: 提交到 App Store"
+echo "   3. 验证所有架构的 DMG 文件"
 echo ""
-

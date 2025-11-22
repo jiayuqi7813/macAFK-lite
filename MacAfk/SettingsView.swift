@@ -5,23 +5,23 @@ struct SettingsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("MacAfk Settings")
+            Text("settings.macafk_settings".localized)
                 .font(.headline)
             
-            Toggle("Enable Low Brightness Mode", isOn: $appModel.isLowBrightness)
-                .help("Automatically lower brightness when Jiggler is active")
+            Toggle("settings.enable_low_brightness_mode".localized, isOn: $appModel.isLowBrightness)
+                .help("settings.low_brightness_mode.help".localized)
             
             Divider()
             
-            Text("Shortcuts")
+            Text("settings.shortcuts".localized)
                 .font(.subheadline)
-            Text("Toggle Jiggler: Cmd + Ctrl + S")
+            Text("settings.toggle_jiggler_shortcut".localized)
                 .font(.caption)
                 .foregroundColor(.secondary)
             
             Divider()
             
-            Button("Quit MacAfk") {
+            Button("button.quit_macafk".localized) {
                 NSApplication.shared.terminate(nil)
             }
         }

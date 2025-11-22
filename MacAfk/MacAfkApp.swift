@@ -10,13 +10,33 @@ import SwiftUI
 @main
 struct MacAfkApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var languageManager = LanguageManager.shared
+    @State private var showingPreferences = false
     
     var body: some Scene {
         WindowGroup {
             ContentView(appModel: appDelegate.appModel)
+                .environmentObject(languageManager)
+                .sheet(isPresented: $showingPreferences) {
+                    PreferencesView()
+                        .environmentObject(languageManager)
+                }
         }
         .commands {
-            // Add standard commands if needed
+            CommandGroup(replacing: .appSettings) {
+                Button("menu.preferences".localized) {
+                    showingPreferences = true
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+            
+            // 添加设置菜单
+            CommandMenu("menu.settings".localized) {
+                Button("menu.preferences".localized) {
+                    showingPreferences = true
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
         }
     }
 }

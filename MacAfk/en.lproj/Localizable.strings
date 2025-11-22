@@ -1,0 +1,77 @@
+/* 
+  Localizable.strings (English)
+  MacAfk
+*/
+
+// App Name
+"app.name" = "MacAfk";
+
+// Status Messages
+"status.preventing_sleep" = "Preventing Sleep...";
+"status.system_sleep_allowed" = "System Sleep Allowed";
+
+// Buttons
+"button.start_jiggling" = "Start Jiggling";
+"button.stop_jiggling" = "Stop Jiggling";
+"button.cancel" = "Cancel";
+"button.done" = "Done";
+"button.reset_defaults" = "Reset to Defaults";
+"button.quit" = "Quit";
+"button.quit_macafk" = "Quit MacAfk";
+"button.customize_all_shortcuts" = "Customize All Shortcuts";
+
+// Settings
+"settings.title" = "Shortcut Settings";
+"settings.low_brightness_mode" = "Low Brightness Mode";
+"settings.low_brightness_mode.help" = "Automatically lower brightness when Jiggler is active";
+"settings.shortcuts" = "Shortcuts";
+"settings.macafk_settings" = "MacAfk Settings";
+"settings.enable_low_brightness_mode" = "Enable Low Brightness Mode";
+"settings.toggle_jiggler_shortcut" = "Toggle Jiggler: Cmd + Ctrl + S";
+
+// Jiggle Interval
+"jiggle.interval" = "Jiggle Interval:";
+"jiggle.interval.decrease" = "Decrease interval (⌘ ⌃ ↓)";
+"jiggle.interval.increase" = "Increase interval (⌘ ⌃ ↑)";
+
+// Shortcut Actions
+"shortcut.toggle_jiggle" = "Toggle Sleep Prevention";
+"shortcut.toggle_brightness" = "Toggle Low Brightness Mode";
+"shortcut.increase_interval" = "Increase Jiggle Interval";
+"shortcut.decrease_interval" = "Decrease Jiggle Interval";
+
+// Shortcut Descriptions
+"shortcut.toggle_jiggle.description" = "Turn mouse jiggling on or off";
+"shortcut.toggle_brightness.description" = "Turn low brightness mode on or off";
+"shortcut.increase_interval.description" = "Increase the time interval between mouse movements";
+"shortcut.decrease_interval.description" = "Decrease the time interval between mouse movements";
+
+// Shortcut Editor
+"shortcut.editor.title" = "Shortcut Settings";
+"shortcut.editor.recording" = "Press new shortcut...";
+"shortcut.editor.not_set" = "Not Set";
+
+// Menu Items
+"menu.start_jiggling" = "Start Jiggling";
+"menu.stop_jiggling" = "Stop Jiggling";
+"menu.show_main_window" = "Show Main Window";
+
+// Footer
+"footer.permission_hint" = "Note: Please grant permission in \"System Settings > Privacy & Security > Accessibility\"";
+
+// Messages
+"message.low_brightness_enabled" = "Low brightness mode enabled";
+"message.low_brightness_disabled" = "Low brightness mode disabled";
+
+// Settings Menu
+"menu.settings" = "Settings";
+"menu.preferences" = "Preferences...";
+"menu.language" = "Language";
+"menu.language.english" = "English";
+"menu.language.chinese" = "简体中文";
+"menu.language.restart_required" = "Language change will take effect after restart";
+
+// Language
+"language.english" = "English";
+"language.chinese" = "简体中文";
+

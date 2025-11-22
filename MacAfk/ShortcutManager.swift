@@ -102,25 +102,25 @@ class ShortcutManager: ObservableObject {
             action: .toggleJiggle,
             keyCode: 1,  // S
             modifiers: [.command, .control],
-            displayName: "切换防休眠"
+            displayName: NSLocalizedString("shortcut.toggle_jiggle", comment: "")
         ),
         .toggleBrightness: ShortcutConfig(
             action: .toggleBrightness,
             keyCode: 11, // B
             modifiers: [.command, .control],
-            displayName: "切换低亮度模式"
+            displayName: NSLocalizedString("shortcut.toggle_brightness", comment: "")
         ),
         .increaseJiggleInterval: ShortcutConfig(
             action: .increaseJiggleInterval,
             keyCode: 126, // 上箭头
             modifiers: [.command, .control],
-            displayName: "增加抖动间隔"
+            displayName: NSLocalizedString("shortcut.increase_interval", comment: "")
         ),
         .decreaseJiggleInterval: ShortcutConfig(
             action: .decreaseJiggleInterval,
             keyCode: 125, // 下箭头
             modifiers: [.command, .control],
-            displayName: "减少抖动间隔"
+            displayName: NSLocalizedString("shortcut.decrease_interval", comment: "")
         )
     ]
     
@@ -174,7 +174,7 @@ class ShortcutManager: ObservableObject {
     
     /// 获取快捷键显示字符串
     func getShortcutDisplay(for action: ShortcutAction) -> String {
-        return shortcuts[action]?.displayString ?? "未设置"
+        return shortcuts[action]?.displayString ?? NSLocalizedString("shortcut.editor.not_set", comment: "")
     }
     
     /// 更新快捷键配置
@@ -197,25 +197,25 @@ class ShortcutManager: ObservableObject {
                 action: .toggleJiggle,
                 keyCode: 1,
                 modifiers: [.command, .control],
-                displayName: "切换防休眠"
+                displayName: NSLocalizedString("shortcut.toggle_jiggle", comment: "")
             ),
             .toggleBrightness: ShortcutConfig(
                 action: .toggleBrightness,
                 keyCode: 11,
                 modifiers: [.command, .control],
-                displayName: "切换低亮度模式"
+                displayName: NSLocalizedString("shortcut.toggle_brightness", comment: "")
             ),
             .increaseJiggleInterval: ShortcutConfig(
                 action: .increaseJiggleInterval,
                 keyCode: 126,
                 modifiers: [.command, .control],
-                displayName: "增加抖动间隔"
+                displayName: NSLocalizedString("shortcut.increase_interval", comment: "")
             ),
             .decreaseJiggleInterval: ShortcutConfig(
                 action: .decreaseJiggleInterval,
                 keyCode: 125,
                 modifiers: [.command, .control],
-                displayName: "减少抖动间隔"
+                displayName: NSLocalizedString("shortcut.decrease_interval", comment: "")
             )
         ]
         saveCustomShortcuts()

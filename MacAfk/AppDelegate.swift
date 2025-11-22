@@ -25,17 +25,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func constructMenu() {
         let menu = NSMenu()
         
-        let statusTitle = appModel.isJiggling ? "Stop Jiggling" : "Start Jiggling"
+        let statusTitle = appModel.isJiggling ? NSLocalizedString("menu.stop_jiggling", comment: "") : NSLocalizedString("menu.start_jiggling", comment: "")
         let toggleItem = NSMenuItem(title: statusTitle, action: #selector(toggleJiggler), keyEquivalent: "S")
         menu.addItem(toggleItem)
         
-        let brightnessItem = NSMenuItem(title: "Low Brightness Mode", action: #selector(toggleBrightness), keyEquivalent: "B")
+        let brightnessItem = NSMenuItem(title: NSLocalizedString("settings.low_brightness_mode", comment: ""), action: #selector(toggleBrightness), keyEquivalent: "B")
         brightnessItem.state = appModel.isLowBrightness ? .on : .off
         menu.addItem(brightnessItem)
         
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Show Main Window", action: #selector(showMainWindow), keyEquivalent: "w"))
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: NSLocalizedString("menu.show_main_window", comment: ""), action: #selector(showMainWindow), keyEquivalent: "w"))
+        menu.addItem(NSMenuItem(title: NSLocalizedString("button.quit", comment: ""), action: #selector(quit), keyEquivalent: "q"))
         
         statusItem.menu = menu
         
@@ -57,7 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func updateMenu() {
         guard let menu = statusItem.menu else { return }
         
-        menu.items[0].title = appModel.isJiggling ? "Stop Jiggling" : "Start Jiggling"
+        menu.items[0].title = appModel.isJiggling ? NSLocalizedString("menu.stop_jiggling", comment: "") : NSLocalizedString("menu.start_jiggling", comment: "")
         menu.items[1].state = appModel.isLowBrightness ? .on : .off
         
         if let button = statusItem.button {

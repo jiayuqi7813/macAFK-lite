@@ -16,7 +16,7 @@ struct ShortcutRecorderView: View {
                 HStack {
                     Image(systemName: "keyboard.fill")
                         .foregroundColor(.red)
-                    Text("按下新快捷键...")
+                    Text("shortcut.editor.recording".localized)
                         .foregroundColor(.red)
                 }
                 .padding(8)
@@ -29,7 +29,7 @@ struct ShortcutRecorderView: View {
                         )
                 )
                 
-                Button("取消") {
+                Button("button.cancel".localized) {
                     isRecording = false
                 }
                 .buttonStyle(.bordered)
@@ -84,7 +84,7 @@ struct ShortcutEditorView: View {
         VStack(spacing: 0) {
             // 标题栏
             HStack {
-                Text("快捷键设置")
+                Text("shortcut.editor.title".localized)
                     .font(.title2)
                     .fontWeight(.bold)
                 
@@ -127,14 +127,14 @@ struct ShortcutEditorView: View {
             
             // 底部按钮
             HStack {
-                Button("恢复默认") {
+                Button("button.reset_defaults".localized) {
                     shortcutManager.resetToDefaults()
                 }
                 .buttonStyle(.bordered)
                 
                 Spacer()
                 
-                Button("完成") {
+                Button("button.done".localized) {
                     dismiss()
                 }
                 .buttonStyle(.borderedProminent)
@@ -196,19 +196,19 @@ extension ShortcutAction: CaseIterable {
     
     var displayName: String {
         switch self {
-        case .toggleJiggle: return "切换防休眠"
-        case .toggleBrightness: return "切换低亮度模式"
-        case .increaseJiggleInterval: return "增加抖动间隔"
-        case .decreaseJiggleInterval: return "减少抖动间隔"
+        case .toggleJiggle: return "shortcut.toggle_jiggle".localized
+        case .toggleBrightness: return "shortcut.toggle_brightness".localized
+        case .increaseJiggleInterval: return "shortcut.increase_interval".localized
+        case .decreaseJiggleInterval: return "shortcut.decrease_interval".localized
         }
     }
     
     var description: String {
         switch self {
-        case .toggleJiggle: return "开启或关闭鼠标抖动防休眠"
-        case .toggleBrightness: return "开启或关闭低亮度模式"
-        case .increaseJiggleInterval: return "增加鼠标抖动的时间间隔"
-        case .decreaseJiggleInterval: return "减少鼠标抖动的时间间隔"
+        case .toggleJiggle: return "shortcut.toggle_jiggle.description".localized
+        case .toggleBrightness: return "shortcut.toggle_brightness.description".localized
+        case .increaseJiggleInterval: return "shortcut.increase_interval.description".localized
+        case .decreaseJiggleInterval: return "shortcut.decrease_interval.description".localized
         }
     }
     

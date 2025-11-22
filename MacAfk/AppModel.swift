@@ -88,7 +88,7 @@ class AppModel: ObservableObject {
         toggleBrightnessMode()
         
         // 可选：显示通知
-        let message = isLowBrightness ? "低亮度模式已启用" : "低亮度模式已关闭"
+        let message = isLowBrightness ? NSLocalizedString("message.low_brightness_enabled", comment: "") : NSLocalizedString("message.low_brightness_disabled", comment: "")
         print("ℹ️ \(message)")
     }
     
