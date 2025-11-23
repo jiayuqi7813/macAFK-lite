@@ -22,6 +22,7 @@ struct MacAfkApp: App {
                         .environmentObject(languageManager)
                 }
         }
+        .windowStyle(.hiddenTitleBar)
         .commands {
             CommandGroup(replacing: .appSettings) {
                 Button("menu.preferences".localized) {
