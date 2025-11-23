@@ -45,9 +45,7 @@ build_variant() {
         -arch "$arch" \
         -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
         archive \
-        CODE_SIGN_IDENTITY="-" \
-        CODE_SIGNING_REQUIRED=NO \
-        CODE_SIGNING_ALLOWED=NO
+        -allowProvisioningUpdates
     
     # 导出 app
     # 检查是否在 CI 环境中
@@ -59,11 +57,12 @@ build_variant() {
             -exportOptionsPlist "$PROJECT_DIR/ExportOptions-CI.plist" \
             -allowProvisioningUpdates
     else
-        # 本地环境使用 Lite 配置
+        # 本地环境使用 Lite 配置（会自动签名并上传到 App Store Connect）
         xcodebuild -exportArchive \
             -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
             -exportPath "$export_path" \
-            -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Lite.plist"
+            -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Lite.plist" \
+            -allowProvisioningUpdates
     fi
     
     echo "✅ MacAfk Lite ($arch) 构建完成！"
@@ -165,7 +164,11 @@ echo "   版本号: $VERSION"
 echo "   构建时间: $(date)"
 echo ""
 echo "📋 下一步："
-echo "   1. 提交到 App Store"
-echo "   2. 或发布到 GitHub Release"
+echo "   1. 使用 Xcode 或 Transporter 上传到 App Store Connect"
+echo "   2. 或发布 DMG 文件到 GitHub Release"
 echo "   3. 验证所有架构的 DMG 文件"
+echo ""
+echo "💡 提示："
+echo "   - .app 文件位于: $BUILD_DIR/"
+echo "   - 可以使用 Transporter 或 xcrun altool 上传 .pkg 文件"
 echo ""
