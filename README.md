@@ -1,4 +1,4 @@
-# MacAfk - macOS 防休眠工具
+# MacAfk Lite - macOS 防休眠工具
 
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS-blue" alt="Platform">
@@ -18,11 +18,9 @@
 - **无感操作** - 1像素移动，完全不影响工作
 
 ### 🌙 智能亮度控制
-- **双模式支持**
-  - **Pro 版**：真实硬件亮度控制（DisplayServices API）
-  - **Lite 版**：软件调光（Gamma 表，App Store 兼容）
-- **自动检测** - 根据运行环境自动选择最佳模式
-- **低亮度模式** - 一键降低屏幕亮度，省电延长续航
+- **软件调光** - 使用 Gamma 表实现软件亮度调节，App Store 兼容
+- **低亮度模式** - 一键降低屏幕亮度，保护眼睛
+- **沙盒安全** - 完全符合 App Store 安全要求
 
 ### ⌨️ 强大的快捷键系统
 - **全局快捷键** - 后台运行也能快速控制
@@ -36,41 +34,29 @@
 
 ---
 
-## 📦 双版本说明
-
-| 版本 | MacAfk Pro | MacAfk Lite |
-|------|-----------|-------------|
-| **亮度控制** | DisplayServices（真实硬件）| Gamma 调光（软件模拟）|
-| **省电效果** | ✅ 真实降低功耗 | ❌ 屏幕背光不变 |
-| **沙盒** | ❌ 禁用 | ✅ 启用 |
-| **App Store** | ❌ 不可上架 | ✅ 可上架 |
-| **用户体验** | ⭐️⭐️⭐️⭐️⭐️ | ⭐️⭐️⭐️⭐️ |
-| **发布渠道** | GitHub/网站 | App Store |
-| **推荐人群** | 追求最佳体验 | 需要 App Store 版本 |
-
----
-
 ## 🚀 快速开始
 
 ### 下载安装
 
-#### Pro 版（推荐）
+#### 从 GitHub 下载
 ```bash
 # GitHub Releases 下载
-https://github.com/yourusername/MacAfk/releases
+https://github.com/jiayuqi7813/macAFK-lite/releases
 
-# 或使用 Homebrew
-brew install --cask macafk-pro
+# 或克隆源码自行编译
+git clone https://github.com/jiayuqi7813/macAFK-lite.git
+cd macAFK-lite
+./build.sh
 ```
 
-#### Lite 版
-- App Store: [搜索 "MacAfk Lite"](#)
+#### App Store
+- App Store: 搜索 "MacAfk Lite"（即将上架）
 
 ### 首次运行
 
 1. **授予辅助功能权限**
    - 打开「系统设置」→「隐私与安全性」→「辅助功能」
-   - 添加 MacAfk 并启用
+   - 添加 MacAfk Lite 并启用
 
 2. **启动应用**
    - 点击状态栏图标
@@ -106,21 +92,14 @@ brew install --cask macafk-pro
 
 #### 快速构建
 ```bash
-cd MacAfk
-xcodebuild -scheme MacAfk -configuration Debug build
+cd macAFK-lite
+xcodebuild -scheme MacAfk -configuration Release-AppStore build
 ```
 
-#### 构建双版本
+#### 使用构建脚本
 ```bash
-# 使用自动化脚本
+# 使用自动化脚本构建 Lite 版本
 ./build.sh
-
-# 或手动构建
-# Pro 版（真实亮度）
-xcodebuild -scheme MacAfk -configuration Release build
-
-# Lite 版（Gamma 调光）
-xcodebuild -scheme MacAfk -configuration Release-AppStore build
 ```
 
 ---
@@ -136,7 +115,7 @@ xcodebuild -scheme MacAfk -configuration Release-AppStore build
 ### 场景2：下载/处理任务 ⏬
 ```
 问题：长时间任务但不想屏幕一直亮着
-解决：⌘ ⌃ S + ⌘ ⌃ B（低亮度模式省电）
+解决：⌘ ⌃ S + ⌘ ⌃ B（低亮度模式保护眼睛）
 ```
 
 ### 场景3：远程工作 💻
@@ -167,9 +146,9 @@ xcodebuild -scheme MacAfk -configuration Release-AppStore build
 ## 🛠️ 技术架构
 
 ```
-MacAfk
+MacAfk Lite
 ├── AppModel.swift              # 应用状态管理
-├── BrightnessControl.swift     # 双模式亮度控制
+├── BrightnessControl.swift     # Gamma 表亮度控制
 ├── Jiggler.swift               # 鼠标抖动引擎
 ├── ShortcutManager.swift       # 快捷键管理系统
 ├── ShortcutEditorView.swift    # 快捷键编辑器
@@ -181,8 +160,7 @@ MacAfk
 ### 核心技术
 - **SwiftUI** - 现代化 UI 框架
 - **CoreGraphics** - 鼠标事件模拟
-- **DisplayServices** - 真实亮度控制（Pro）
-- **Gamma 表** - 软件调光（Lite）
+- **Gamma 表** - 软件调光（App Store 兼容）
 - **NSEvent** - 全局快捷键监听
 - **UserDefaults** - 配置持久化
 
@@ -208,8 +186,6 @@ MacAfk
 
 ## 📝 相关文档
 
-- [快捷键使用指南](SHORTCUTS.md)
-- [双版本发布指南](README-DUAL-VERSION.md)
 - [更新日志](CHANGELOG.md)
 
 ---
@@ -217,19 +193,19 @@ MacAfk
 ## ❓ 常见问题
 
 ### Q: 快捷键不工作？
-A: 请确保已在「系统设置」→「隐私与安全性」→「辅助功能」中授予 MacAfk 权限。
-
-### Q: Pro 版和 Lite 版怎么选？
-A: 如果追求最佳体验和省电效果，选择 Pro 版；如果需要 App Store 版本，选择 Lite 版。
+A: 请确保已在「系统设置」→「隐私与安全性」→「辅助功能」中授予 MacAfk Lite 权限。
 
 ### Q: 亮度控制不起作用？
-A: Pro 版需要禁用沙盒；Lite 版使用 Gamma 调光，效果与真实亮度不同。
+A: MacAfk Lite 使用 Gamma 调光技术，这是软件级别的调整，不会改变屏幕的实际硬件亮度。如果需要真实的硬件亮度控制，请使用系统设置。
 
 ### Q: 会影响电池续航吗？
-A: 使用默认 60 秒间隔，影响极小（<0.02% CPU）。Pro 版的低亮度模式还能省电。
+A: 使用默认 60 秒间隔，影响极小（<0.02% CPU）。
+
+### Q: 与 App Store 兼容吗？
+A: 是的，MacAfk Lite 完全符合 App Store 的沙盒要求。
 
 ### Q: 支持外接显示器吗？
-A: 是的，Pro 版支持多显示器；Lite 版主要针对主显示器。
+A: 主要针对主显示器进行优化。
 
 ---
 
@@ -248,9 +224,8 @@ A: 是的，Pro 版支持多显示器；Lite 版主要针对主显示器。
 
 ## 💬 联系方式
 
-- **问题反馈**: [GitHub Issues](https://github.com/yourusername/MacAfk/issues)
-- **功能建议**: [GitHub Discussions](https://github.com/yourusername/MacAfk/discussions)
-- **邮件**: your.email@example.com
+- **问题反馈**: [GitHub Issues](https://github.com/jiayuqi7813/macAFK-lite/issues)
+- **功能建议**: [GitHub Discussions](https://github.com/jiayuqi7813/macAFK-lite/discussions)
 
 ---
 
@@ -259,6 +234,5 @@ A: 是的，Pro 版支持多显示器；Lite 版主要针对主显示器。
 </p>
 
 <p align="center">
-  Made with ❤️ by [Your Name]
+  Made with ❤️ for macOS users
 </p>
-

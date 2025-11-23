@@ -4,7 +4,7 @@
 */
 
 // App Name
-"app.name" = "MacAfk";
+"app.name" = "MacAfk Lite";
 
 // Status Messages
 "status.preventing_sleep" = "Preventing Sleep...";
@@ -17,7 +17,7 @@
 "button.done" = "Done";
 "button.reset_defaults" = "Reset to Defaults";
 "button.quit" = "Quit";
-"button.quit_macafk" = "Quit MacAfk";
+"button.quit_macafk" = "Quit MacAfk Lite";
 "button.customize_all_shortcuts" = "Customize All Shortcuts";
 
 // Settings
@@ -25,7 +25,7 @@
 "settings.low_brightness_mode" = "Low Brightness Mode";
 "settings.low_brightness_mode.help" = "Automatically lower brightness when Jiggler is active";
 "settings.shortcuts" = "Shortcuts";
-"settings.macafk_settings" = "MacAfk Settings";
+"settings.macafk_settings" = "MacAfk Lite Settings";
 "settings.enable_low_brightness_mode" = "Enable Low Brightness Mode";
 "settings.toggle_jiggler_shortcut" = "Toggle Jiggler: Cmd + Ctrl + S";
 
@@ -74,4 +74,11 @@
 // Language
 "language.english" = "English";
 "language.chinese" = "简体中文";
+
+// Preferences - Low Brightness
+"preferences.low_brightness_settings" = "Low Brightness Settings";
+"preferences.brightness_level" = "Brightness Level";
+"preferences.preview_brightness" = "Preview Brightness";
+"preferences.stop_preview" = "Stop Preview";
+"preferences.brightness_hint" = "Adjust the brightness level when low brightness mode is active. Use preview to test.";
 

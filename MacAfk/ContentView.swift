@@ -42,7 +42,7 @@ struct ContentView: View {
                     .foregroundColor(appModel.isJiggling ? .green : .secondary)
                     .symbolEffect(.bounce, value: appModel.isJiggling)
                 
-                Text("MacAfk")
+                Text("MacAfk Lite")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 

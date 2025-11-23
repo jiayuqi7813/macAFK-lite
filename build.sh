@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# MacAfk 多架构构建脚本
-# 用于构建 Pro 版和 Lite 版的 ARM64 和 x86_64 版本
+# MacAfk Lite 多架构构建脚本
+# 专为 App Store 版本构建 ARM64 和 x86_64 版本
 
 set -e
 
@@ -15,7 +15,7 @@ DIST_DIR="$PROJECT_DIR/Dist"
 # 获取版本号（从 git tag 或默认值）
 VERSION="${VERSION:-$(git describe --tags --abbrev=0 2>/dev/null || echo "1.0.0")}"
 
-echo "🏗️  MacAfk 多架构构建脚本"
+echo "🏗️  MacAfk Lite 多架构构建脚本"
 echo "================================"
 echo "版本: $VERSION"
 echo ""
@@ -31,19 +31,17 @@ mkdir -p "$DIST_DIR"
 
 # 构建函数
 build_variant() {
-    local variant=$1  # Pro 或 Lite
-    local arch=$2     # arm64 或 x86_64
-    local config=$3   # Release 或 Release-AppStore
+    local arch=$1     # arm64 或 x86_64
     
     echo ""
-    echo "🚀 构建 MacAfk $variant ($arch)..."
+    echo "🚀 构建 MacAfk Lite ($arch)..."
     
-    local archive_name="MacAfk-${variant}-${arch}"
-    local export_path="$BUILD_DIR/${variant}-${arch}"
+    local archive_name="MacAfk-Lite-${arch}"
+    local export_path="$BUILD_DIR/Lite-${arch}"
     
     # 构建 archive
     xcodebuild -scheme "$PROJECT_NAME" \
-        -configuration "$config" \
+        -configuration "Release-AppStore" \
         -arch "$arch" \
         -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
         archive \
@@ -61,36 +59,28 @@ build_variant() {
             -exportOptionsPlist "$PROJECT_DIR/ExportOptions-CI.plist" \
             -allowProvisioningUpdates
     else
-        # 本地环境使用正式配置
-        if [ "$variant" = "Pro" ]; then
-            xcodebuild -exportArchive \
-                -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
-                -exportPath "$export_path" \
-                -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Pro.plist"
-        else
-            xcodebuild -exportArchive \
-                -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
-                -exportPath "$export_path" \
-                -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Lite.plist"
-        fi
+        # 本地环境使用 Lite 配置
+        xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_DIR/${archive_name}.xcarchive" \
+            -exportPath "$export_path" \
+            -exportOptionsPlist "$PROJECT_DIR/ExportOptions-Lite.plist"
     fi
     
-    echo "✅ MacAfk $variant ($arch) 构建完成！"
+    echo "✅ MacAfk Lite ($arch) 构建完成！"
 }
 
 # 创建 DMG 函数
 create_dmg() {
-    local variant=$1
-    local arch=$2
-    local app_name=$3
+    local arch=$1
+    local app_name=$2
     
     echo ""
-    echo "📦 创建 MacAfk $variant ($arch) DMG..."
+    echo "📦 创建 MacAfk Lite ($arch) DMG..."
     
-    local source_dir="$BUILD_DIR/${variant}-${arch}"
-    local dmg_name="MacAfk-${variant}-${arch}-v${VERSION}.dmg"
+    local source_dir="$BUILD_DIR/Lite-${arch}"
+    local dmg_name="MacAfk-Lite-${arch}-v${VERSION}.dmg"
     
-    hdiutil create -volname "MacAfk $variant" \
+    hdiutil create -volname "MacAfk Lite" \
         -srcfolder "$source_dir" \
         -ov -format UDZO \
         "$DIST_DIR/$dmg_name"
@@ -98,35 +88,20 @@ create_dmg() {
     echo "✅ DMG 创建完成：$dmg_name"
 }
 
-# 构建 Pro 版本
+# 构建 Lite 版本
 echo ""
 echo "═══════════════════════════════"
-echo "📦 构建 Pro 版本（真实硬件亮度）"
+echo "📦 构建 Lite 版本（App Store）"
 echo "═══════════════════════════════"
-echo "   - 沙盒：禁用"
-echo "   - 亮度控制：DisplayServices API"
-echo "   - Bundle ID: com.snowywar.MacAfk"
+echo "   - 沙盒：启用"
+echo "   - 亮度控制：Gamma 调光"
+echo "   - Bundle ID: com.snowywar.MacAfk.lite"
 
-build_variant "Pro" "arm64" "Release"
-build_variant "Pro" "x86_64" "Release"
+build_variant "arm64"
+build_variant "x86_64"
 
-create_dmg "Pro" "arm64" "MacAfk Pro"
-create_dmg "Pro" "x86_64" "MacAfk Pro"
-
-# Lite 版本已禁用（如需启用，取消下面注释）
-# echo ""
-# echo "═══════════════════════════════"
-# echo "📦 构建 Lite 版本（App Store）"
-# echo "═══════════════════════════════"
-# echo "   - 沙盒：启用"
-# echo "   - 亮度控制：Gamma 调光"
-# echo "   - Bundle ID: com.snowywar.MacAfk.lite"
-# 
-# build_variant "Lite" "arm64" "Release-AppStore"
-# build_variant "Lite" "x86_64" "Release-AppStore"
-# 
-# create_dmg "Lite" "arm64" "MacAfk Lite"
-# create_dmg "Lite" "x86_64" "MacAfk Lite"
+create_dmg "arm64" "MacAfk Lite"
+create_dmg "x86_64" "MacAfk Lite"
 
 # 创建通用二进制（Universal Binary）
 echo ""
@@ -135,15 +110,14 @@ echo "🔗 创建通用二进制版本"
 echo "═══════════════════════════════"
 
 create_universal() {
-    local variant=$1
-    local app_name=$2
+    local app_name=$1
     
     echo ""
-    echo "📦 合并 $variant 版本 (arm64 + x86_64)..."
+    echo "📦 合并 Lite 版本 (arm64 + x86_64)..."
     
-    local arm_app="$BUILD_DIR/${variant}-arm64/${app_name}.app"
-    local x86_app="$BUILD_DIR/${variant}-x86_64/${app_name}.app"
-    local universal_dir="$BUILD_DIR/${variant}-Universal"
+    local arm_app="$BUILD_DIR/Lite-arm64/${app_name}.app"
+    local x86_app="$BUILD_DIR/Lite-x86_64/${app_name}.app"
+    local universal_dir="$BUILD_DIR/Lite-Universal"
     local universal_app="$universal_dir/${app_name}.app"
     
     mkdir -p "$universal_dir"
@@ -156,9 +130,9 @@ create_universal() {
         -output "$universal_app/Contents/MacOS/$PROJECT_NAME"
     
     # 创建 Universal DMG
-    local dmg_name="MacAfk-${variant}-Universal-v${VERSION}.dmg"
+    local dmg_name="MacAfk-Lite-Universal-v${VERSION}.dmg"
     
-    hdiutil create -volname "MacAfk $variant" \
+    hdiutil create -volname "MacAfk Lite" \
         -srcfolder "$universal_dir" \
         -ov -format UDZO \
         "$DIST_DIR/$dmg_name"
@@ -166,8 +140,7 @@ create_universal() {
     echo "✅ Universal DMG 创建完成：$dmg_name"
 }
 
-create_universal "Pro" "MacAfk Pro"
-# create_universal "Lite" "MacAfk Lite"  # Lite 版本已禁用
+create_universal "MacAfk Lite"
 
 # 生成校验和
 echo ""
@@ -192,7 +165,7 @@ echo "   版本号: $VERSION"
 echo "   构建时间: $(date)"
 echo ""
 echo "📋 下一步："
-echo "   1. Pro 版: 发布到 GitHub Release"
-echo "   2. Lite 版: 提交到 App Store"
+echo "   1. 提交到 App Store"
+echo "   2. 或发布到 GitHub Release"
 echo "   3. 验证所有架构的 DMG 文件"
 echo ""

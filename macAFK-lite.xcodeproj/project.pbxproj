@@ -24,7 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2B62EE8A2ED03F0E00FC811E /* MacAfk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacAfk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B62EE8A2ED03F0E00FC811E /* macAFK-lite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "macAFK-lite.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B62EE972ED03F0F00FC811E /* MacAfkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacAfkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B62EEA12ED03F0F00FC811E /* MacAfkUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacAfkUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -85,7 +85,7 @@
 		2B62EE8B2ED03F0E00FC811E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2B62EE8A2ED03F0E00FC811E /* MacAfk.app */,
+				2B62EE8A2ED03F0E00FC811E /* macAFK-lite.app */,
 				2B62EE972ED03F0F00FC811E /* MacAfkTests.xctest */,
 				2B62EEA12ED03F0F00FC811E /* MacAfkUITests.xctest */,
 			);
@@ -114,7 +114,7 @@
 			packageProductDependencies = (
 			);
 			productName = MacAfk;
-			productReference = 2B62EE8A2ED03F0E00FC811E /* MacAfk.app */;
+			productReference = 2B62EE8A2ED03F0E00FC811E /* macAFK-lite.app */;
 			productType = "com.apple.product-type.application";
 		};
 		2B62EE962ED03F0F00FC811E /* MacAfkTests */ = {
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2B62EE852ED03F0E00FC811E /* Build configuration list for PBXProject "MacAfk" */;
+			buildConfigurationList = 2B62EE852ED03F0E00FC811E /* Build configuration list for PBXProject "macAFK-lite" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -457,9 +457,19 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H53Q22J4T3;
-				ENABLE_APP_SANDBOX = NO;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -469,7 +479,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.snowywar.macAFK-lite;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.snowywar.macAFK-lite";
 				PRODUCT_NAME = "macAFK-lite";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -492,9 +502,19 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H53Q22J4T3;
-				ENABLE_APP_SANDBOX = NO;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -504,7 +524,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.snowywar.macAFK-lite;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.snowywar.macAFK-lite";
 				PRODUCT_NAME = "macAFK-lite";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -540,7 +560,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.snowywar.macAFK-lite;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.snowywar.macAFK-lite";
 				PRODUCT_NAME = "macAFK-lite";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

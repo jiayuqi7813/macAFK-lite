@@ -3,61 +3,26 @@ import AppKit
 import CoreGraphics
 import Combine
 
-/// 亮度控制类 - 双模式实现
-/// 模式1：DisplayServices API（真实硬件亮度，需禁用沙盒）
-/// 模式2：Gamma 调光（软件模拟，App Store 兼容）
-/// 参考：MonitorControl 和 MonitorControl Lite
+/// 亮度控制类 - Gamma 调光模式（App Store 兼容）
+/// 使用 Gamma 表实现软件级别的亮度调节
+/// 参考：MonitorControl Lite
 class BrightnessControl: ObservableObject {
     
-    private var previousBrightness: Float = 0.5
+    private var previousBrightness: Float = 1.0  // 默认为最大亮度
     private let displayQueue: DispatchQueue
+    private var hasSetBrightness = false  // 标记是否已设置过亮度
     
-    // DisplayServices 函数指针（模式1）
-    private var setDisplayBrightness: ((CGDirectDisplayID, Float) -> Int32)?
-    private var getDisplayBrightness: ((CGDirectDisplayID, UnsafeMutablePointer<Float>) -> Int32)?
-    
-    // Gamma 表（模式2 - App Store 兼容）
+    // Gamma 表（App Store 兼容模式）
     private var defaultGammaTableRed: [CGGammaValue] = []
     private var defaultGammaTableGreen: [CGGammaValue] = []
     private var defaultGammaTableBlue: [CGGammaValue] = []
     
-    // 当前使用的模式
-    private var useHardwareBrightness: Bool = false
-    
     init() {
-        self.displayQueue = DispatchQueue(label: "com.macafk.brightness")
-        self.loadDisplayServices()
+        self.displayQueue = DispatchQueue(label: "com.macafk.lite.brightness")
         self.loadDefaultGammaTables()
     }
     
-    /// 动态加载 DisplayServices 框架（模式1）
-    private func loadDisplayServices() {
-        let path = "/System/Library/PrivateFrameworks/DisplayServices.framework/Versions/A/DisplayServices"
-        guard let handle = dlopen(path, RTLD_LAZY) else {
-            print("ℹ️ [亮度控制] DisplayServices 不可用，将使用 Gamma 模式（App Store 兼容）")
-            return
-        }
-        
-        if let setPtr = dlsym(handle, "DisplayServicesSetBrightness") {
-            typealias SetBrightnessFunc = @convention(c) (CGDirectDisplayID, Float) -> Int32
-            self.setDisplayBrightness = unsafeBitCast(setPtr, to: SetBrightnessFunc.self)
-        }
-        
-        if let getPtr = dlsym(handle, "DisplayServicesGetBrightness") {
-            typealias GetBrightnessFunc = @convention(c) (CGDirectDisplayID, UnsafeMutablePointer<Float>) -> Int32
-            self.getDisplayBrightness = unsafeBitCast(getPtr, to: GetBrightnessFunc.self)
-        }
-        
-        // 检测是否成功加载
-        if self.setDisplayBrightness != nil && self.getDisplayBrightness != nil {
-            self.useHardwareBrightness = true
-            print("✅ [亮度控制] 使用 DisplayServices（真实硬件亮度）")
-        } else {
-            print("ℹ️ [亮度控制] DisplayServices 加载失败，使用 Gamma 模式")
-        }
-    }
-    
-    /// 加载默认 Gamma 表（模式2 - 参考 MonitorControl Lite）
+    /// 加载默认 Gamma 表（参考 MonitorControl Lite）
     private func loadDefaultGammaTables() {
         let displayID = CGMainDisplayID()
         var sampleCount: UInt32 = 0
@@ -86,52 +51,44 @@ class BrightnessControl: ObservableObject {
     
     // MARK: - Public Methods
     
-    func setLowestBrightness() {
-        previousBrightness = getAppleBrightness()
-        setAppleBrightness(value: 0.01)
+    func setLowestBrightness(level: Float = 0.1) {
+        // 如果之前没有设置过亮度，保存当前值（假设为正常亮度 1.0）
+        if !hasSetBrightness {
+            previousBrightness = 1.0
+        }
+        let clampedLevel = max(min(level, 0.5), 0.01) // 限制在 0.01 到 0.5 之间
+        setAppleBrightness(value: clampedLevel)
+        print("🌙 [亮度控制] 已设置低亮度模式 (\(clampedLevel))，之前亮度: \(previousBrightness)")
     }
     
     func restoreBrightness() {
         setAppleBrightness(value: previousBrightness)
+        print("☀️ [亮度控制] 已恢复亮度到: \(previousBrightness)")
     }
     
     /// 直接设置亮度（用于测试和手动调节）
     func setCustomBrightness(level: Float) {
+        // 记录用户手动设置的亮度，作为恢复值
+        previousBrightness = level
+        hasSetBrightness = true
         setAppleBrightness(value: level)
     }
     
-    /// 获取当前亮度
+    /// 获取当前亮度（Gamma 模式下返回上次设置的值）
     func getCurrentBrightness() -> Float {
-        return getAppleBrightness()
+        return previousBrightness
     }
     
     // MARK: - Private Methods
     
-    /// 获取 Apple 显示器亮度
-    private func getAppleBrightness() -> Float {
-        // 模式1：硬件亮度
-        if useHardwareBrightness, let getBrightness = self.getDisplayBrightness {
-            var brightness: Float = 0.5
-            getBrightness(CGMainDisplayID(), &brightness)
-            return brightness
-        }
-        
-        // 模式2：Gamma 模式无法准确读取，返回上次设置的值
-        return previousBrightness
-    }
-    
-    /// 设置 Apple 显示器亮度
+    /// 设置亮度（使用 Gamma 调光）
     private func setAppleBrightness(value: Float) {
         let clampedValue = max(min(value, 1.0), 0.0)
         
         self.displayQueue.sync {
-            if self.useHardwareBrightness, let setBrightness = self.setDisplayBrightness {
-                // 模式1：真实硬件亮度（DisplayServices）
-                _ = setBrightness(CGMainDisplayID(), clampedValue)
-            } else {
-                // 模式2：Gamma 调光（App Store 兼容，参考 MonitorControl Lite）
-                self.setGammaBrightness(clampedValue)
-            }
+            self.setGammaBrightness(clampedValue)
+            // 标记已设置过亮度
+            self.hasSetBrightness = true
         }
     }
     
@@ -150,4 +107,3 @@ class BrightnessControl: ObservableObject {
         CGSetDisplayTransferByTable(displayID, sampleCount, gammaTableRed, gammaTableGreen, gammaTableBlue)
     }
 }
-

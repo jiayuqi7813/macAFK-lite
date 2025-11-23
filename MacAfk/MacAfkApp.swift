@@ -18,7 +18,7 @@ struct MacAfkApp: App {
             ContentView(appModel: appDelegate.appModel)
                 .environmentObject(languageManager)
                 .sheet(isPresented: $showingPreferences) {
-                    PreferencesView()
+                    PreferencesView(appModel: appDelegate.appModel)
                         .environmentObject(languageManager)
                 }
         }

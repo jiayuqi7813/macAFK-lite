@@ -19,6 +19,7 @@
 ### Changed
 - 窗口默认尺寸调整为 400x700
 - 间隔显示格式（使用 "s" 和 "min"）
+- 专注于 Lite 版本（App Store 兼容）
 
 ### Fixed
 - 语言管理器缺少 Combine 导入问题
@@ -29,10 +30,9 @@
 ### Added
 - 初始版本发布
 - 鼠标抖动防休眠功能
-- 低亮度模式
+- 低亮度模式（Gamma 软件调光）
 - 自定义快捷键支持
-- Pro 版本（真实硬件亮度控制）
-- Lite 版本（Gamma 软件调光，App Store 兼容）
+- Lite 版本（App Store 兼容）
 - 状态栏菜单集成
 - 可调节的抖动间隔（10秒 - 10分钟）
 
@@ -40,20 +40,20 @@
 - 无网络请求
 - 本地数据存储
 - 开源代码可审计
+- 完全符合 App Store 沙盒要求
 
 ---
 
 ## 版本说明
 
-### 版本说明
-- ✅ 真实硬件亮度控制（DisplayServices API）
-- ✅ 更好的省电效果
-- ✅ 无沙盒限制
-- ✅ 直接从 GitHub 下载
+### MacAfk Lite 特性
+- ✅ Gamma 表软件调光（App Store 兼容）
+- ✅ 完全沙盒安全
+- ✅ 多架构支持（ARM64 + x86_64）
 - ✅ 开源透明
+- ✅ 可从 GitHub 下载或 App Store 安装
 
 ---
 
-[Unreleased]: https://github.com/yourusername/macAFK/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/yourusername/macAFK/releases/tag/v1.0.0
-
+[Unreleased]: https://github.com/jiayuqi7813/macAFK-lite/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/jiayuqi7813/macAFK-lite/releases/tag/v1.0.0
