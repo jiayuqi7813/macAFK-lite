@@ -17,7 +17,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         if let button = statusItem.button {
             button.image = loadMenuBarIcon(isActive: false)
-            button.action = #selector(toggleMenu)
+            button.action = #selector(statusBarButtonClicked(_:))
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
         
         // Create the menu
@@ -72,8 +73,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return false
     }
     
-    @objc func toggleMenu() {
-        statusItem.menu?.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+    @objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
+        guard let event = NSApp.currentEvent else { return }
+        
+        if event.type == .rightMouseUp {
+            // 右键点击：显示菜单
+            statusItem.menu?.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+        } else {
+            // 左键点击：切换抖动状态
+            appModel.toggleJiggle()
+        }
     }
     
     func constructMenu() {

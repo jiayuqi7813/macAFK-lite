@@ -1,4 +1,5 @@
 import SwiftUI
+import ServiceManagement
 
 struct PreferencesView: View {
     @ObservedObject var appModel: AppModel
@@ -7,6 +8,7 @@ struct PreferencesView: View {
     @State private var showRestartAlert = false
     @State private var previewBrightness: Float = 0.1
     @State private var isPreviewMode = false
+    @State private var launchAtLogin = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -129,6 +131,34 @@ struct PreferencesView: View {
                             .fill(Color(nsColor: .controlBackgroundColor))
                     )
                     
+                    // 常规设置
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "gearshape")
+                                .foregroundColor(.purple)
+                                .font(.title3)
+                            
+                            Text("settings.macafk_settings".localized)
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 12) {
+                            Toggle("settings.launch_at_login".localized, isOn: $launchAtLogin)
+                                .toggleStyle(.switch)
+                                .help("settings.launch_at_login.help".localized)
+                                .onChange(of: launchAtLogin) { _, newValue in
+                                    setLaunchAtLogin(enabled: newValue)
+                                }
+                        }
+                        .padding(.leading, 32)
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(nsColor: .controlBackgroundColor))
+                    )
+                    
                     // 语言设置
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
@@ -200,6 +230,10 @@ struct PreferencesView: View {
             .background(Color(nsColor: .controlBackgroundColor))
         }
         .frame(width: 550, height: 600)
+        .onAppear {
+            // 读取当前的开机自启动状态
+            launchAtLogin = SMAppService.mainApp.status == .enabled
+        }
         .onDisappear {
             // 退出时如果还在预览模式，恢复亮度
             if isPreviewMode {
@@ -212,6 +246,28 @@ struct PreferencesView: View {
             }
         } message: {
             Text("menu.language.restart_required".localized)
+        }
+    }
+    
+    private func setLaunchAtLogin(enabled: Bool) {
+        do {
+            if enabled {
+                if SMAppService.mainApp.status == .enabled {
+                    print("✅ 开机自启动已启用")
+                } else {
+                    try SMAppService.mainApp.register()
+                    print("✅ 已设置开机自启动")
+                }
+            } else {
+                try SMAppService.mainApp.unregister()
+                print("❌ 已取消开机自启动")
+            }
+        } catch {
+            print("⚠️ 设置开机自启动失败: \(error.localizedDescription)")
+            // 恢复开关状态
+            DispatchQueue.main.async {
+                launchAtLogin = SMAppService.mainApp.status == .enabled
+            }
         }
     }
 }
