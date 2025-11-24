@@ -4,24 +4,51 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
     var appModel = AppModel()
-    
+    private let languageManager = LanguageManager.shared
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // 设置应用为 accessory 类型（不显示在 Dock 栏）
+        // 初始状态：隐藏 Dock 图标，只在状态栏显示
         NSApp.setActivationPolicy(.accessory)
         
         // Create the status item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "sleep", accessibilityDescription: "MacAfk")
+            button.image = loadMenuBarIcon(isActive: false)
             button.action = #selector(toggleMenu)
         }
         
         // Create the menu
         constructMenu()
+        
+        // 监听窗口关闭事件，以便在窗口关闭时隐藏Dock图标
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowWillClose(_:)),
+            name: NSWindow.willCloseNotification,
+            object: nil
+        )
+        
+        // 监听窗口显示事件，确保窗口显示时激活策略为regular
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidBecomeKey(_:)),
+            name: NSWindow.didBecomeKeyNotification,
+            object: nil
+        )
+        
+        // 监听语言切换事件，更新菜单
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(languageDidChange),
+            name: .languageChanged,
+            object: nil
+        )
+        
+        // 监听更新状态变化
     }
     
-    // 窗口关闭时不退出应用
+    // 关闭窗口后不退出应用，继续在后台运行
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return false
     }
@@ -33,23 +60,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func constructMenu() {
         let menu = NSMenu()
         
-        let statusTitle = appModel.isJiggling ? NSLocalizedString("menu.stop_jiggling", comment: "") : NSLocalizedString("menu.start_jiggling", comment: "")
+        let statusTitle = appModel.isJiggling ? languageManager.localizedString(for: "menu.stop_jiggling") : languageManager.localizedString(for: "menu.start_jiggling")
         let toggleItem = NSMenuItem(title: statusTitle, action: #selector(toggleJiggler), keyEquivalent: "S")
         menu.addItem(toggleItem)
         
-        let brightnessItem = NSMenuItem(title: NSLocalizedString("settings.low_brightness_mode", comment: ""), action: #selector(toggleBrightness), keyEquivalent: "B")
+        let brightnessItem = NSMenuItem(title: languageManager.localizedString(for: "settings.low_brightness_mode"), action: #selector(toggleBrightness), keyEquivalent: "B")
         brightnessItem.state = appModel.isLowBrightness ? .on : .off
         menu.addItem(brightnessItem)
         
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: NSLocalizedString("menu.show_main_window", comment: ""), action: #selector(showMainWindow), keyEquivalent: "w"))
-        menu.addItem(NSMenuItem(title: NSLocalizedString("button.quit", comment: ""), action: #selector(quit), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: languageManager.localizedString(for: "menu.show_main_window"), action: #selector(showMainWindow), keyEquivalent: "w"))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: languageManager.localizedString(for: "button.quit"), action: #selector(quit), keyEquivalent: "q"))
         
         statusItem.menu = menu
-        
-        // Observe changes to update menu
-        // In a real app we'd use Combine to update the menu item titles.
-        // For now, we'll just rebuild or update on action.
     }
     
     @objc func toggleJiggler() {
@@ -65,64 +89,68 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func updateMenu() {
         guard let menu = statusItem.menu else { return }
         
-        menu.items[0].title = appModel.isJiggling ? NSLocalizedString("menu.stop_jiggling", comment: "") : NSLocalizedString("menu.start_jiggling", comment: "")
+        menu.items[0].title = appModel.isJiggling ? languageManager.localizedString(for: "menu.stop_jiggling") : languageManager.localizedString(for: "menu.start_jiggling")
         menu.items[1].state = appModel.isLowBrightness ? .on : .off
         
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: appModel.isJiggling ? "sleep.circle.fill" : "sleep", accessibilityDescription: "MacAfk")
+            button.image = loadMenuBarIcon(isActive: appModel.isJiggling)
         }
+    }
+    
+    @objc func languageDidChange() {
+        // 语言切换时重新构建菜单
+        constructMenu()
     }
     
     
     @objc func showMainWindow() {
-        // 临时切换到 regular 模式以显示窗口和 Dock 图标
+        // 显示窗口前，将激活策略改为 regular，以便菜单栏正常显示
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
-        
-        // 查找并显示主窗口
-        var foundWindow = false
-        for window in NSApp.windows {
-            // 查找 SwiftUI 主窗口
-            if window.title == "" || window.className.contains("SwiftUI") {
-                window.makeKeyAndOrderFront(nil)
-                window.center()
-                foundWindow = true
-                
-                // 添加窗口关闭监听
-                NotificationCenter.default.removeObserver(self, name: NSWindow.willCloseNotification, object: window)
-                NotificationCenter.default.addObserver(
-                    self,
-                    selector: #selector(windowWillClose),
-                    name: NSWindow.willCloseNotification,
-                    object: window
-                )
-                break
-            }
-        }
-        
-        // 如果没找到窗口，也要尝试激活第一个窗口
-        if !foundWindow, let firstWindow = NSApp.windows.first {
-            firstWindow.makeKeyAndOrderFront(nil)
-            firstWindow.center()
-            
-            NotificationCenter.default.removeObserver(self, name: NSWindow.willCloseNotification, object: firstWindow)
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(windowWillClose),
-                name: NSWindow.willCloseNotification,
-                object: firstWindow
-            )
+        if let window = NSApp.windows.first {
+            window.makeKeyAndOrderFront(nil)
         }
     }
     
+    @objc func windowDidBecomeKey(_ notification: Notification) {
+        // 窗口成为主窗口时，确保激活策略为regular，以便菜单栏正常显示
+        NSApp.setActivationPolicy(.regular)
+    }
+    
     @objc func windowWillClose(_ notification: Notification) {
-        // 窗口关闭时，恢复为 accessory 模式（隐藏 Dock 图标）
+        // 延迟检查，确保窗口关闭事件完成
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            NSApp.setActivationPolicy(.accessory)
+            // 检查是否还有可见的应用窗口（不包括菜单等系统窗口）
+            let visibleWindows = NSApp.windows.filter { window in
+                window.isVisible && window.canBecomeKey
+            }
+            
+            if visibleWindows.isEmpty {
+                // 所有窗口关闭后，隐藏 Dock 图标
+                NSApp.setActivationPolicy(.accessory)
+            }
         }
     }
     
     @objc func quit() {
         NSApplication.shared.terminate(nil)
+    }
+    
+    // MARK: - Menu Bar Icon
+    
+    private func loadMenuBarIcon(isActive: Bool) -> NSImage? {
+        let iconName = isActive ? "menubar-active" : "menubar-idle"
+        
+        // 从 Asset Catalog 加载图标
+        guard let image = NSImage(named: iconName) else {
+            // 如果加载失败，使用系统图标作为后备
+            print("⚠️ 无法加载图标: \(iconName)")
+            return NSImage(systemSymbolName: isActive ? "sleep.circle.fill" : "sleep", accessibilityDescription: "MacAfk Pro")
+        }
+        
+        // Asset Catalog 中已设置为 template，这里设置尺寸
+        image.size = NSSize(width: 24, height: 24)
+        
+        return image
     }
 }
