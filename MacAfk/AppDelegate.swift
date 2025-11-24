@@ -1,10 +1,12 @@
 import Cocoa
 import SwiftUI
+import Combine
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
     var appModel = AppModel()
     private let languageManager = LanguageManager.shared
+    private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // 初始状态：隐藏 Dock 图标，只在状态栏显示
@@ -45,7 +47,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
         
-        // 监听更新状态变化
+        // 监听 AppModel 的 isJiggling 状态变化，自动更新图标和菜单
+        appModel.$isJiggling
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.updateMenuBarIcon()
+                    self?.updateMenuTitle()
+                }
+            }
+            .store(in: &cancellables)
+        
+        // 监听 AppModel 的 isLowBrightness 状态变化，自动更新菜单
+        appModel.$isLowBrightness
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.updateMenuTitle()
+                }
+            }
+            .store(in: &cancellables)
     }
     
     // 关闭窗口后不退出应用，继续在后台运行
@@ -87,11 +106,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func updateMenu() {
+        updateMenuTitle()
+        updateMenuBarIcon()
+    }
+    
+    private func updateMenuTitle() {
         guard let menu = statusItem.menu else { return }
         
         menu.items[0].title = appModel.isJiggling ? languageManager.localizedString(for: "menu.stop_jiggling") : languageManager.localizedString(for: "menu.start_jiggling")
         menu.items[1].state = appModel.isLowBrightness ? .on : .off
-        
+    }
+    
+    private func updateMenuBarIcon() {
         if let button = statusItem.button {
             button.image = loadMenuBarIcon(isActive: appModel.isJiggling)
         }
@@ -107,8 +133,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // 显示窗口前，将激活策略改为 regular，以便菜单栏正常显示
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
-        if let window = NSApp.windows.first {
-            window.makeKeyAndOrderFront(nil)
+        
+        // 查找真正的应用主窗口，排除状态栏窗口和其他系统窗口
+        if let mainWindow = NSApp.windows.first(where: { window in
+            // 排除状态栏窗口和不能成为主窗口的窗口
+            return window.canBecomeKey && !window.className.contains("StatusBar")
+        }) {
+            mainWindow.makeKeyAndOrderFront(nil)
+            mainWindow.center()
+        } else {
+            // 如果没有找到现有窗口，可能需要创建一个新窗口
+            print("⚠️ 未找到可显示的主窗口")
         }
     }
     
