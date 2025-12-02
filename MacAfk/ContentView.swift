@@ -65,48 +65,6 @@ struct ContentView: View {
                 .tint(appModel.isJiggling ? .red : .green)
                 .controlSize(.large)
                 
-                // 抖动间隔显示
-                HStack(spacing: 8) {
-                    Image(systemName: "timer")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 16))
-                    
-                    Text("jiggle.interval".localized)
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                    
-                    Text(appModel.jiggler.getIntervalDisplay())
-                        .font(.system(.body, design: .monospaced))
-                        .fontWeight(.semibold)
-                        .foregroundColor(.blue)
-                        .frame(minWidth: 60, alignment: .leading)
-                    
-                    Spacer()
-                    
-                    // 间隔调整按钮
-                    HStack(spacing: 4) {
-                        Button(action: {
-                            appModel.jiggler.decreaseInterval()
-                        }) {
-                            Image(systemName: "minus.circle.fill")
-                                .font(.system(size: 20))
-                        }
-                        .buttonStyle(.plain)
-                        .help("jiggle.interval.decrease".localized)
-                        
-                        Button(action: {
-                            appModel.jiggler.increaseInterval()
-                        }) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 20))
-                        }
-                        .buttonStyle(.plain)
-                        .help("jiggle.interval.increase".localized)
-                    }
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                
                 Toggle("settings.low_brightness_mode".localized, isOn: $appModel.isLowBrightness)
                     .toggleStyle(.switch)
                     .help("settings.low_brightness_mode.help".localized)

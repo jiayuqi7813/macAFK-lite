@@ -1,6 +1,6 @@
 import Foundation
-import CoreGraphics
 import Combine
+import IOKit.pwr_mgt
 
 class Jiggler: ObservableObject {
     @Published var isRunning = false
@@ -12,7 +12,7 @@ class Jiggler: ObservableObject {
         }
     }
     
-    private var timer: Timer?
+    private var assertionID: IOPMAssertionID = 0
     
     // 可选的间隔档位（秒）
     private let intervalPresets: [TimeInterval] = [10, 30, 60, 120, 300, 600]
@@ -47,28 +47,27 @@ class Jiggler: ObservableObject {
         }
         
         print("🚀 [Jiggler] 准备启动...")
-        isRunning = true
         
-        // 使用当前间隔启动定时器（添加到主 RunLoop）
-        let newTimer = Timer(timeInterval: currentInterval, repeats: true) { [weak self] _ in
-            print("⏰ [Jiggler] Timer 触发")
-            self?.jiggleMouse()
-        }
-        RunLoop.main.add(newTimer, forMode: .common)
-        timer = newTimer
+        // 使用 IOPMAssertion 防止系统休眠
+        let reason = "AFK Lite - Prevent System Sleep" as CFString
+        let assertionType = kIOPMAssertionTypePreventUserIdleSystemSleep as CFString
         
-        // 检查 timer 是否有效
-        if timer?.isValid == true {
-            print("✅ [Jiggler] Timer 创建成功，间隔: \(Int(currentInterval)) 秒")
+        let result = IOPMAssertionCreateWithName(
+            assertionType,
+            IOPMAssertionLevel(kIOPMAssertionLevelOn),
+            reason,
+            &assertionID
+        )
+        
+        if result == kIOReturnSuccess {
+            print("✅ [Jiggler] 防休眠断言创建成功 (ID: \(assertionID))")
+            isRunning = true
         } else {
-            print("❌ [Jiggler] Timer 创建失败")
+            print("❌ [Jiggler] 防休眠断言创建失败 (错误代码: \(result))")
+            return
         }
         
-        // 立即执行一次
-        print("🎯 [Jiggler] 立即执行首次抖动")
-        jiggleMouse()
-        
-        print("▶️ [Jiggler] 已启动，间隔: \(Int(currentInterval)) 秒")
+        print("▶️ [Jiggler] 已启动防休眠模式")
     }
     
     func stop() {
@@ -81,13 +80,23 @@ class Jiggler: ObservableObject {
         }
         
         guard isRunning else { return }
+        
+        // 释放防休眠断言
+        if assertionID != 0 {
+            let result = IOPMAssertionRelease(assertionID)
+            if result == kIOReturnSuccess {
+                print("✅ [Jiggler] 防休眠断言已释放 (ID: \(assertionID))")
+            } else {
+                print("⚠️ [Jiggler] 释放防休眠断言失败 (错误代码: \(result))")
+            }
+            assertionID = 0
+        }
+        
         isRunning = false
-        timer?.invalidate()
-        timer = nil
         print("⏸️ [Jiggler] 已停止")
     }
     
-    /// 增加抖动间隔
+    /// 增加抖动间隔（保留UI兼容性，但IOPMAssertion不需要间隔）
     func increaseInterval() {
         guard currentPresetIndex < intervalPresets.count - 1 else {
             print("⚠️ [Jiggler] 已达到最大间隔")
@@ -97,15 +106,10 @@ class Jiggler: ObservableObject {
         currentPresetIndex += 1
         currentInterval = intervalPresets[currentPresetIndex]
         
-        // 如果正在运行，重启定时器
-        if isRunning {
-            restart()
-        }
-        
-        print("⬆️ [Jiggler] 间隔增加到 \(Int(currentInterval)) 秒")
+        print("⬆️ [Jiggler] 间隔增加到 \(Int(currentInterval)) 秒（仅用于显示）")
     }
     
-    /// 减少抖动间隔
+    /// 减少抖动间隔（保留UI兼容性，但IOPMAssertion不需要间隔）
     func decreaseInterval() {
         guard currentPresetIndex > 0 else {
             print("⚠️ [Jiggler] 已达到最小间隔")
@@ -115,15 +119,10 @@ class Jiggler: ObservableObject {
         currentPresetIndex -= 1
         currentInterval = intervalPresets[currentPresetIndex]
         
-        // 如果正在运行，重启定时器
-        if isRunning {
-            restart()
-        }
-        
-        print("⬇️ [Jiggler] 间隔减少到 \(Int(currentInterval)) 秒")
+        print("⬇️ [Jiggler] 间隔减少到 \(Int(currentInterval)) 秒（仅用于显示）")
     }
     
-    /// 设置自定义间隔
+    /// 设置自定义间隔（保留UI兼容性，但IOPMAssertion不需要间隔）
     func setInterval(_ interval: TimeInterval) {
         currentInterval = interval
         
@@ -132,18 +131,7 @@ class Jiggler: ObservableObject {
             currentPresetIndex = closestIndex
         }
         
-        // 如果正在运行，重启定时器
-        if isRunning {
-            restart()
-        }
-        
-        print("🔧 [Jiggler] 间隔设置为 \(Int(currentInterval)) 秒")
-    }
-    
-    /// 重启定时器（应用新间隔）
-    private func restart() {
-        stop()
-        start()
+        print("🔧 [Jiggler] 间隔设置为 \(Int(currentInterval)) 秒（仅用于显示）")
     }
     
     /// 获取间隔显示字符串
@@ -193,54 +181,4 @@ class Jiggler: ObservableObject {
         }
     }
     
-    private func jiggleMouse() {
-        print("🐭 [Jiggler] jiggleMouse() 被调用")
-        
-        // 获取当前鼠标位置
-        guard let currentEvent = CGEvent(source: nil) else {
-            print("❌ [Jiggler] 无法创建 CGEvent（可能缺少辅助功能权限）")
-            return
-        }
-        
-        let mouseLocation = currentEvent.location
-        print("📍 [Jiggler] 当前鼠标位置: (\(mouseLocation.x), \(mouseLocation.y))")
-        
-        // 向右移动 1 像素
-        let newLocation = CGPoint(x: mouseLocation.x + 1, y: mouseLocation.y)
-        let moveRight = CGEvent(
-            mouseEventSource: nil,
-            mouseType: .mouseMoved,
-            mouseCursorPosition: newLocation,
-            mouseButton: .left
-        )
-        
-        if moveRight != nil {
-            moveRight?.post(tap: .cghidEventTap)
-            print("➡️ [Jiggler] 鼠标移动到: (\(newLocation.x), \(newLocation.y))")
-        } else {
-            print("❌ [Jiggler] 无法创建移动事件")
-        }
-        
-        // 延迟一点再移回（使用 weak self 避免循环引用）
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { [weak self] in
-            guard self?.isRunning == true else {
-                print("⚠️ [Jiggler] 已停止，跳过移回操作")
-                return
-            }
-            
-            let moveBack = CGEvent(
-                mouseEventSource: nil,
-                mouseType: .mouseMoved,
-                mouseCursorPosition: mouseLocation,
-                mouseButton: .left
-            )
-            
-            if moveBack != nil {
-                moveBack?.post(tap: .cghidEventTap)
-                print("⬅️ [Jiggler] 鼠标移回: (\(mouseLocation.x), \(mouseLocation.y))")
-            } else {
-                print("❌ [Jiggler] 无法创建移回事件")
-            }
-        }
-    }
 }

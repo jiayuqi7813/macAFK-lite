@@ -59,7 +59,7 @@
 "menu.show_main_window" = "显示主窗口";
 
 // Footer
-"footer.permission_hint" = "提示：需要在「系统设置 > 隐私与安全性 > 辅助功能」中授予权限";
+"footer.permission_hint" = "无需特殊权限，开箱即用。";
 
 // Messages
 "message.low_brightness_enabled" = "低亮度模式已启用";

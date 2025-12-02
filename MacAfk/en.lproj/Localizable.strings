@@ -59,7 +59,7 @@
 "menu.show_main_window" = "Show Main Window";
 
 // Footer
-"footer.permission_hint" = "Note: Please grant permission in \"System Settings > Privacy & Security > Accessibility\"";
+"footer.permission_hint" = "No special permissions required. Works out of the box.";
 
 // Messages
 "message.low_brightness_enabled" = "Low brightness mode enabled";
